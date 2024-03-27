@@ -1,5 +1,5 @@
 {
-    "name": "hyperf/database-sqlserver",
+    "name": "hyperf/database-sqlserver-incubator",
     "type": "library",
     "description": "The sqlserver driver for hyperf/database.",
     "license": "MIT",
