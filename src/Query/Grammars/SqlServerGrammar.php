@@ -308,6 +308,14 @@ class SqlServerGrammar extends Grammar
     }
 
     /**
+     * Compile a truncate table statement into SQL.
+     */
+    public function compileTruncate(Builder $query): array
+    {
+        return ['truncate table ' . $this->wrapTable($query->from) => []];
+    }
+
+    /**
      * Compile the "select *" portion of the query.
      *
      * @param array $columns
