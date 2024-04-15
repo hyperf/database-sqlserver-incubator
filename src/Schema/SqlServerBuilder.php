@@ -69,6 +69,32 @@ class SqlServerBuilder extends Builder
         );
     }
 
+    public function getColumnListing($table): array
+    {
+        [$schema, $table] = $this->parseSchemaAndTable($table);
+
+        $databaseName = $this->connection->getDatabaseName();
+
+        $table = $this->connection->getTablePrefix() . $table;
+
+        $results = $this->connection->select(
+            $this->grammar->compileColumnListing($table),
+        );
+
+        return $this->connection->getPostProcessor()->processColumnListing($results);
+    }
+
+    /**
+     * Determine if the given table has a given column.
+     *
+     * @param string $table
+     * @param string $column
+     */
+    public function hasColumn($table, $column): bool
+    {
+        return in_array(strtolower($column), array_map('strtolower', $this->getColumnListing($table)), true);
+    }
+
     /**
      * Get the foreign keys for a given table.
      */
