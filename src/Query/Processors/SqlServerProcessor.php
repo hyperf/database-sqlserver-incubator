@@ -19,6 +19,11 @@ use Hyperf\Database\Query\Processors\Processor;
 
 class SqlServerProcessor extends Processor
 {
+    public function processColumnListing(array $results): array
+    {
+        return array_map(static fn ($result) => $result->name, $results);
+    }
+
     /**
      * Process an "insert get ID" query.
      *
@@ -115,10 +120,8 @@ class SqlServerProcessor extends Processor
 
     /**
      * Process an "insert get ID" query for ODBC.
-     *
-     * @throws Exception
      */
-    protected function processInsertGetIdForOdbc(Connection $connection): int
+    protected function processInsertGetIdForOdbc(mixed $connection): int
     {
         $result = $connection->selectFromWriteConnection(
             'SELECT CAST(COALESCE(SCOPE_IDENTITY(), @@IDENTITY) AS int) AS insertid'
@@ -130,6 +133,6 @@ class SqlServerProcessor extends Processor
 
         $row = $result[0];
 
-        return is_object($row) ? $row->insertid : $row['insertid'];
+        return (int) (is_object($row) ? $row->insertid : $row['insertid']);
     }
 }

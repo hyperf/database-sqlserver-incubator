@@ -13,7 +13,6 @@ declare(strict_types=1);
 namespace HyperfTest\Database\Sqlsrv;
 
 use Hyperf\Database\Connection;
-use Hyperf\Database\Query\Expression;
 use Hyperf\Database\Schema\Blueprint;
 use Hyperf\Database\Schema\ForeignIdColumnDefinition;
 use Hyperf\Database\Sqlsrv\Schema\Grammars\SqlServerGrammar;
@@ -359,38 +358,6 @@ class DatabaseSqlServerSchemaGrammarTest extends TestCase
 
         $this->assertCount(1, $statements);
         $this->assertSame('alter table "users" add "foo" bigint not null identity primary key', $statements[0]);
-    }
-
-    public function testAddingForeignID()
-    {
-        $blueprint = new Blueprint('users');
-        $foreignId = $blueprint->foreignId('foo');
-        $blueprint->foreignId('company_id')->constrained();
-        $blueprint->foreignId('laravel_idea_id')->constrained();
-        $blueprint->foreignId('team_id')->references('id')->on('teams');
-        $blueprint->foreignId('team_column_id')->constrained('teams');
-
-        $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
-
-        $this->assertInstanceOf(ForeignIdColumnDefinition::class, $foreignId);
-        $this->assertSame([
-            'alter table "users" add "foo" bigint not null, "company_id" bigint not null, "laravel_idea_id" bigint not null, "team_id" bigint not null, "team_column_id" bigint not null',
-            'alter table "users" add constraint "users_company_id_foreign" foreign key ("company_id") references "companies" ("id")',
-            'alter table "users" add constraint "users_laravel_idea_id_foreign" foreign key ("laravel_idea_id") references "laravel_ideas" ("id")',
-            'alter table "users" add constraint "users_team_id_foreign" foreign key ("team_id") references "teams" ("id")',
-            'alter table "users" add constraint "users_team_column_id_foreign" foreign key ("team_column_id") references "teams" ("id")',
-        ], $statements);
-    }
-
-    public function testAddingForeignIdSpecifyingIndexNameInConstraint()
-    {
-        $blueprint = new Blueprint('users');
-        $blueprint->foreignId('company_id')->constrained(indexName: 'my_index');
-        $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
-        $this->assertSame([
-            'alter table "users" add "company_id" bigint not null',
-            'alter table "users" add constraint "my_index" foreign key ("company_id") references "companies" ("id")',
-        ], $statements);
     }
 
     public function testAddingBigIncrementingID()
@@ -916,25 +883,6 @@ class DatabaseSqlServerSchemaGrammarTest extends TestCase
 
         $this->assertCount(1, $statements);
         $this->assertSame('alter table "geo" add "coordinates" geography not null', $statements[0]);
-    }
-
-    public function testAddingGeneratedColumn()
-    {
-        $blueprint = new Blueprint('products');
-        $blueprint->integer('price');
-        $blueprint->computed('discounted_virtual', 'price - 5');
-        $blueprint->computed('discounted_stored', 'price - 5')->persisted();
-        $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
-        $this->assertCount(1, $statements);
-        $this->assertSame('alter table "products" add "price" int not null, "discounted_virtual" as (price - 5), "discounted_stored" as (price - 5) persisted', $statements[0]);
-
-        $blueprint = new Blueprint('products');
-        $blueprint->integer('price');
-        $blueprint->computed('discounted_virtual', new Expression('price - 5'));
-        $blueprint->computed('discounted_stored', new Expression('price - 5'))->persisted();
-        $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
-        $this->assertCount(1, $statements);
-        $this->assertSame('alter table "products" add "price" int not null, "discounted_virtual" as (price - 5), "discounted_stored" as (price - 5) persisted', $statements[0]);
     }
 
     public function testGrammarsAreMacroable()

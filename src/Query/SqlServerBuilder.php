@@ -18,7 +18,6 @@ use Hyperf\Database\Query\Builder;
 use Hyperf\Database\Query\Expression;
 use Hyperf\Database\Query\Expression as ExpressionContract;
 use Hyperf\Database\Sqlsrv\Exception\InvalidArgumentException;
-use RectorPrefix202308\Illuminate\Contracts\Database\Query\ConditionExpression;
 
 use function Hyperf\Collection\head;
 
@@ -97,7 +96,7 @@ class SqlServerBuilder extends Builder
      */
     public function where($column, $operator = null, $value = null, $boolean = 'and'): static
     {
-        if ($column instanceof ConditionExpression) {
+        if ($column instanceof Expression) {
             $type = 'Expression';
 
             $this->wheres[] = compact('type', 'column', 'boolean');
@@ -211,7 +210,7 @@ class SqlServerBuilder extends Builder
     {
         $type = 'Basic';
 
-        if ($column instanceof ConditionExpression) {
+        if ($column instanceof Expression) {
             $type = 'Expression';
 
             $this->havings[] = compact('type', 'column', 'boolean');
