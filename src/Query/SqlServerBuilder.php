@@ -35,7 +35,7 @@ class SqlServerBuilder extends Builder
     /**
      * The index hint for the query.
      */
-    public IndexHint $indexHint;
+    public $indexHint;
 
     /**
      * Add an "order by" clause to the query.
